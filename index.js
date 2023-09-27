@@ -27,18 +27,17 @@ wss.on('connection', ws => {
         const payload = JSON.parse(msg)
         const cursor =  cursors.get(ws)
         if (!cursor) return
-        cursors.coordinates = payload
-        wss.clients.forEach(client => {
-            const cursorsArr = []
-            for (const [key,value] of cursors) {                
-                if (client === key) {
-                    cursorsArr.push({...value, coordinates: payload})
-                } else {
-                    cursorsArr.push(value)
-                }
+        cursor.coordinates = payload
+        const cursorsArr = []
+        for (const [key,value] of cursors) {                
+            if (ws === key) {
+                cursorsArr.push({...value, coordinates: payload})
+            } else {
+                cursorsArr.push(value)
             }
+        }
+        wss.clients.forEach(client => {            
             client.send(JSON.stringify(cursorsArr))
-
         })
     })
     ws.on('close', () => {
